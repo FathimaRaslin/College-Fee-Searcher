@@ -6,6 +6,7 @@ function App() {
 
   // CSV DATA
   const [data, setData] = useState([]);
+  const [allRows, setAllRows] = useState([]);
 
   // CHATBOT
   const [chatOpen, setChatOpen] = useState(false);
@@ -21,10 +22,10 @@ function App() {
 
   // FILTER VALUES
   const [filters, setFilters] = useState({
-    state: "",
-    location: "",
-    program: "",
-    course: "",
+    state: "State",
+    location: "Location",
+    program: "Program",
+    course: "Course / Specialization",
   });
 
   // SORT OPTION
@@ -59,6 +60,7 @@ function App() {
         });
 
         setData(rows);
+        setAllRows(rows);
 
         // UNIQUE STATES
         setStates([
@@ -100,12 +102,43 @@ function App() {
 
   }, []);
 
-  // SEND CHAT MESSAGE (FRONTEND ONLY)
+  // FILTER LOCATIONS BASED ON STATE
+  const filteredLocations =
+    filters.state && filters.state !== "State"
+      ? [
+          ...new Set(
+            allRows
+              .filter(
+                (row) =>
+                  row["State"]?.trim() === filters.state
+              )
+              .map((row) => row["Location"]?.trim())
+              .filter(Boolean)
+          ),
+        ]
+      : locations;
+
+  // FILTER COURSES BASED ON PROGRAM
+  const filteredCourses =
+    filters.program && filters.program !== "Program"
+      ? [
+          ...new Set(
+            allRows
+              .filter(
+                (row) =>
+                  row["Program"]?.trim() === filters.program
+              )
+              .map((row) => row["Course / Specialization"]?.trim())
+              .filter(Boolean)
+          ),
+        ]
+      : courses;
+
+  // SEND CHAT MESSAGE
   const sendMessage = () => {
 
     if (!question.trim()) return;
 
-    // ADD USER MESSAGE
     const updatedMessages = [
       ...messages,
       {
@@ -116,7 +149,6 @@ function App() {
 
     setMessages(updatedMessages);
 
-    // TEMP BOT RESPONSE
     setTimeout(() => {
 
       setMessages([
@@ -137,154 +169,142 @@ function App() {
     <div className="min-h-screen bg-[#f8f6f1] flex flex-col items-center px-6 py-10">
 
       {/* TITLE */}
-      <h1 className="text-5xl font-bold text-[#556b2f] mb-10">
+      <h1 className="text-5xl font-bold text-[#556b2f] mb-10 text-center">
         Course Fee Searcher
       </h1>
 
       {/* SEARCH BAR */}
-      <div className="w-full max-w-3xl mb-10 relative">
+      <div className="w-full max-w-4xl mb-10 relative">
 
-        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">
+        <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 text-xl">
           🔍
         </span>
 
         <input
           type="text"
           placeholder="Search for a course to view fee"
-          className="w-full pl-12 p-4 rounded-2xl border border-gray-300 shadow-sm text-lg bg-white"
+          className="w-full pl-14 pr-5 py-5 rounded-3xl border border-gray-200 shadow-lg text-lg bg-white outline-none focus:border-[#556b2f] transition"
         />
 
       </div>
 
-      {/* FILTERS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 w-full max-w-6xl mb-10">
+      {/* FILTER + SORT SECTION */}
+      <div className="w-full max-w-7xl bg-white/90 backdrop-blur-sm border border-gray-200 rounded-3xl shadow-xl p-7 mb-16">
 
-        {/* STATE */}
-        <select
-          value={filters.state}
-          onChange={(e) =>
-            setFilters({ ...filters, state: e.target.value })
-          }
-          className="p-3 rounded-2xl border border-gray-300 bg-white shadow-sm"
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-5">
 
-          <option value="">
-            State
-          </option>
+          {/* STATE */}
+          <select
+            value={filters.state}
+            onChange={(e) =>
+              setFilters({
+                ...filters,
+                state: e.target.value,
+                location: "Location",
+              })
+            }
+            className="p-4 rounded-2xl border border-gray-200 bg-[#fafaf7] shadow-sm outline-none focus:border-[#556b2f] transition text-gray-700"
+          >
 
-          {states.map((state, index) => (
-            <option key={index} value={state}>
-              {state}
+            <option value="State">
+              State
             </option>
-          ))}
 
-        </select>
+            {states.map((state, index) => (
+              <option key={index} value={state}>
+                {state}
+              </option>
+            ))}
 
-        {/* LOCATION */}
-        <select
-          value={filters.location}
-          onChange={(e) =>
-            setFilters({ ...filters, location: e.target.value })
-          }
-          className="p-3 rounded-2xl border border-gray-300 bg-white shadow-sm"
-        >
+          </select>
 
-          <option value="">
-            Location
-          </option>
+          {/* LOCATION */}
+          <select
+            value={filters.location}
+            onChange={(e) =>
+              setFilters({ ...filters, location: e.target.value })
+            }
+            className="p-4 rounded-2xl border border-gray-200 bg-[#fafaf7] shadow-sm outline-none focus:border-[#556b2f] transition text-gray-700"
+          >
 
-          {locations.map((location, index) => (
-            <option key={index} value={location}>
-              {location}
+            <option value="Location">
+              Location
             </option>
-          ))}
 
-        </select>
+            {filteredLocations.map((location, index) => (
+              <option key={index} value={location}>
+                {location}
+              </option>
+            ))}
 
-        {/* PROGRAM */}
-        <select
-          value={filters.program}
-          onChange={(e) =>
-            setFilters({ ...filters, program: e.target.value })
-          }
-          className="p-3 rounded-2xl border border-gray-300 bg-white shadow-sm"
-        >
+          </select>
 
-          <option value="">
-            Program
-          </option>
+          {/* PROGRAM */}
+          <select
+            value={filters.program}
+            onChange={(e) =>
+              setFilters({
+                ...filters,
+                program: e.target.value,
+                course: "Course / Specialization",
+              })
+            }
+            className="p-4 rounded-2xl border border-gray-200 bg-[#fafaf7] shadow-sm outline-none focus:border-[#556b2f] transition text-gray-700"
+          >
 
-          {programs.map((program, index) => (
-            <option key={index} value={program}>
-              {program}
+            <option value="Program">
+              Program
             </option>
-          ))}
 
-        </select>
+            {programs.map((program, index) => (
+              <option key={index} value={program}>
+                {program}
+              </option>
+            ))}
 
-        {/* COURSE */}
-        <select
-          value={filters.course}
-          onChange={(e) =>
-            setFilters({ ...filters, course: e.target.value })
-          }
-          className="p-3 rounded-2xl border border-gray-300 bg-white shadow-sm"
-        >
+          </select>
 
-          <option value="">
-            Course / Specialization
-          </option>
+          {/* COURSE */}
+          <select
+            value={filters.course}
+            onChange={(e) =>
+              setFilters({ ...filters, course: e.target.value })
+            }
+            className="p-4 rounded-2xl border border-gray-200 bg-[#fafaf7] shadow-sm outline-none focus:border-[#556b2f] transition text-gray-700"
+          >
 
-          {courses.map((course, index) => (
-            <option key={index} value={course}>
-              {course}
+            <option value="Course / Specialization">
+              Course / Specialization
             </option>
-          ))}
 
-        </select>
+            {filteredCourses.map((course, index) => (
+              <option key={index} value={course}>
+                {course}
+              </option>
+            ))}
 
-      </div>
+          </select>
 
-      {/* SORT SECTION */}
-      <div className="w-full max-w-6xl bg-white border border-gray-300 rounded-2xl shadow-sm p-6 mb-20">
+          {/* SORT */}
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+            className="p-4 rounded-2xl border border-gray-200 bg-[#fafaf7] shadow-sm outline-none focus:border-[#556b2f] transition text-gray-700"
+          >
 
-        <h2 className="text-2xl font-semibold text-[#556b2f] mb-5">
-          Sort Fee
-        </h2>
+            <option value="">
+              Sort By Fee
+            </option>
 
-        <div className="flex flex-col gap-4">
+            <option value="highToLow">
+              Highest to Lowest
+            </option>
 
-          {/* HIGH TO LOW */}
-          <label className="flex items-center gap-3 cursor-pointer">
+            <option value="lowToHigh">
+              Lowest to Highest
+            </option>
 
-            <input
-              type="radio"
-              name="feeSort"
-              value="highToLow"
-              checked={sortOrder === "highToLow"}
-              onChange={(e) => setSortOrder(e.target.value)}
-              className="accent-[#556b2f]"
-            />
-
-            Highest to Lowest
-
-          </label>
-
-          {/* LOW TO HIGH */}
-          <label className="flex items-center gap-3 cursor-pointer">
-
-            <input
-              type="radio"
-              name="feeSort"
-              value="lowToHigh"
-              checked={sortOrder === "lowToHigh"}
-              onChange={(e) => setSortOrder(e.target.value)}
-              className="accent-[#556b2f]"
-            />
-
-            Lowest to Highest
-
-          </label>
+          </select>
 
         </div>
 
