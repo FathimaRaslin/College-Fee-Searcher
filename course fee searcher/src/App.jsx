@@ -8,6 +8,9 @@ function App() {
   const [data, setData] = useState([]);
   const [allRows, setAllRows] = useState([]);
 
+  // SEARCH
+  const [searchTerm, setSearchTerm] = useState("");
+
   // CHATBOT
   const [chatOpen, setChatOpen] = useState(false);
 
@@ -134,6 +137,11 @@ function App() {
         ]
       : courses;
 
+  // SEARCH BUTTON FUNCTION
+  const handleSearch = () => {
+    console.log("Searching for:", searchTerm);
+  };
+
   // SEND CHAT MESSAGE
   const sendMessage = () => {
 
@@ -174,17 +182,31 @@ function App() {
       </h1>
 
       {/* SEARCH BAR */}
-      <div className="w-full max-w-4xl mb-10 relative">
+      <div className="w-full max-w-4xl mb-10 flex gap-4">
 
-        <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 text-xl">
-          🔍
-        </span>
+        <div className="relative flex-1">
 
-        <input
-          type="text"
-          placeholder="Search for a course to view fee"
-          className="w-full pl-14 pr-5 py-5 rounded-3xl border border-gray-200 shadow-lg text-lg bg-white outline-none focus:border-[#556b2f] transition"
-        />
+          <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 text-xl">
+            🔍
+          </span>
+
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search for a course to view fee"
+            className="w-full pl-14 pr-5 py-5 rounded-3xl border border-gray-200 shadow-lg text-lg bg-white outline-none focus:border-[#556b2f] transition"
+          />
+
+        </div>
+
+        {/* SEARCH BUTTON */}
+        <button
+          onClick={handleSearch}
+          className="bg-[#556b2f] text-white px-8 py-4 rounded-3xl shadow-lg hover:opacity-90 transition font-semibold"
+        >
+          Search
+        </button>
 
       </div>
 
